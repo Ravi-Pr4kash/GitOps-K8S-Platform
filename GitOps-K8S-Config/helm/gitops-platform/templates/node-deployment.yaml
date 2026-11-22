@@ -1,0 +1,57 @@
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: node-app
+
+  labels:
+    app: node-app
+
+spec:
+  replicas: {{ .Values.nodeApp.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: node-app
+
+  template:
+    metadata:
+      labels:
+        app: node-app
+
+    spec:
+      containers:
+        - name: node-app
+
+          image: "{{ .Values.nodeApp.image.repository }}:{{ .Values.nodeApp.image.tag }}"
+
+          imagePullPolicy: {{ .Values.nodeApp.image.pullPolicy }}
+
+          ports:
+            - containerPort: {{ .Values.nodeApp.service.port }}
+
+          
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-node-config
+
+            {{- if .Values.nodeApp.existingSecret }}
+            - secretRef:
+                name: {{ .Values.nodeApp.existingSecret }}
+            {{- end }}
+
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.nodeApp.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.nodeApp.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 20

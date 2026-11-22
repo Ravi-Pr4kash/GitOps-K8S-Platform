@@ -1,0 +1,29 @@
+
+nodeApp:
+  replicaCount: 1
+
+  image:
+    repository: raviiprakashh/gitops-node-app
+    tag: v1
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 3000
+
+  env:
+    PORT: "3000"
+    NODE_ENV: production
+    MONGO_URI: mongodb://mongo:27017/gitops_db
+
+mongodb:
+  image: mongo:8
+
+  persistence:
+    enabled: true
+    existingClaim: mongo-pvc
+
+ingress:
+  enabled: true
+  className: nginx
+  host: gitops.local
