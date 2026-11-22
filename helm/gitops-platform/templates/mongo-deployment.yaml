@@ -1,0 +1,43 @@
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: mongo
+
+  labels:
+    app: mongo
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: mongo
+
+  template:
+    metadata:
+      labels:
+        app: mongo
+
+    spec:
+      containers:
+        - name: mongodb
+
+          image: {{ .Values.mongodb.image }}
+
+          ports:
+            - containerPort: 27017
+
+          {{- if .Values.mongodb.persistence.enabled }}
+          volumeMounts:
+            - name: mongo-storage
+              mountPath: /data/db
+          {{- end }}
+
+      {{- if .Values.mongodb.persistence.enabled }}
+      volumes:
+        - name: mongo-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.mongodb.persistence.existingClaim }}
+      {{- end }}
