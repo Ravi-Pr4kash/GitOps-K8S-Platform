@@ -32,6 +32,20 @@ pipeline {
             }
         }
 
+
+stage('Trivy Security Scan') {
+    steps {
+        sh '''
+            trivy image \
+              --severity HIGH,CRITICAL \
+              --exit-code 1 \
+              --ignore-unfixed \
+              "$IMAGE_NAME:$IMAGE_TAG"
+        '''
+    }
+}
+
+
         stage('Push to Docker Hub') {
             steps {
                 withCredentials([
